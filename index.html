@@ -1,12 +1,1795 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>programmanagementdashboard</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Pulse · Enterprise AI Portfolio Intelligence</title>
+  <meta name="description" content="Enterprise AI portfolio intelligence dashboard — spend tracking, delivery health, risk signals, and an AI copilot. Sample-data demo.">
+  <meta name="theme-color" content="#090c14">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+/* ── Tokens ──────────────────────────────────────────────────── */
+:root {
+  --bg:         #090c14;
+  --bg2:        #0e1220;
+  --bg3:        #131829;
+  --bg4:        #192031;
+  --bg5:        #1f273b;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.13);
+  --border3:    rgba(255,255,255,0.20);
+  --text:       #ddd8d0;
+  --muted:      #636069;
+  --soft:       #9d9790;
+  --gold:       #c8a86e;
+  --gold-dim:   rgba(200,168,110,0.15);
+  --gold-glow:  rgba(200,168,110,0.07);
+  --gold-line:  rgba(200,168,110,0.35);
+  --blue:       #6b9fd4;
+  --blue-dim:   rgba(107,159,212,0.14);
+  --green:      #5aad7a;
+  --green-dim:  rgba(90,173,122,0.13);
+  --amber:      #d49a44;
+  --amber-dim:  rgba(212,154,68,0.14);
+  --red:        #d4615a;
+  --red-dim:    rgba(212,97,90,0.14);
+  --white:      #f0ece5;
+  --sidebar-w:  268px;
+  --r:          14px;
+  --r-sm:       8px;
+  --r-lg:       20px;
+  --shadow:     0 8px 40px rgba(0,0,0,0.45);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,0.55);
+  --font-sans:  'DM Sans', system-ui, sans-serif;
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-mono:  'DM Mono', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+button, input, select, textarea { font: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ── App shell ───────────────────────────────────────────────── */
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100dvh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow-y: auto;
+  z-index: 60;
+  scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+.sidebar-top { flex: 1; display: flex; flex-direction: column; padding: 22px 0 0; }
+
+.brand {
+  display: flex; align-items: center; gap: 11px;
+  padding: 0 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--gold) 0%, #9a7340 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500; color: #fff;
+}
+
+.brand-name { display: block; font-family: var(--font-serif); font-size: 15px; color: var(--white); line-height: 1.2; }
+.brand-sub  { display: block; font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.role-wrap { padding: 18px 18px 14px; border-bottom: 1px solid var(--border); }
+
+.field-lbl {
+  display: block;
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); margin-bottom: 7px;
+}
+
+.sel-wrap { position: relative; }
+
+.role-sel {
+  width: 100%; appearance: none;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--r-sm); padding: 9px 32px 9px 11px;
+  color: var(--text); font-size: 13px; cursor: pointer;
+  transition: border-color .2s;
+}
+.role-sel:focus { outline: none; border-color: var(--gold); }
+
+.sel-arrow {
+  position: absolute; right: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); pointer-events: none; font-size: 11px;
+}
+
+.sidebar-nav { padding: 10px; }
+
+.nav-btn {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 10px 11px;
+  border-radius: var(--r-sm); border: none;
+  background: transparent; color: var(--soft);
+  font-size: 13px; cursor: pointer;
+  transition: background .18s, color .18s;
+  text-align: left;
+}
+.nav-btn:hover { background: var(--bg4); color: var(--text); }
+.nav-btn.active { background: var(--gold-dim); color: var(--gold); font-weight: 500; }
+
+.nav-icon { font-size: 13px; width: 18px; flex-shrink: 0; text-align: center; }
+
+.nav-divider {
+  font-family: var(--font-mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--muted); padding: 14px 11px 6px;
+}
+
+.sidebar-bottom {
+  padding: 14px 18px 22px;
+  border-top: 1px solid var(--border); margin-top: auto;
+}
+
+.fresh-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 8px; }
+
+.fresh-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+
+.fresh-row { display: flex; align-items: center; gap: 7px; }
+.fresh-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.fresh-src { font-size: 11px; color: var(--soft); flex: 1; text-transform: capitalize; }
+.fresh-time { font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); }
+
+.demo-chip {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); background: var(--bg3);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 4px 10px;
+}
+
+/* ── Main ────────────────────────────────────────────────────── */
+.main { display: flex; flex-direction: column; min-height: 100dvh; overflow: hidden; }
+
+/* ── Page header ─────────────────────────────────────────────── */
+.page-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 20px 26px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(9,12,20,0.88); backdrop-filter: blur(22px);
+  position: sticky; top: 0; z-index: 50;
+}
+
+.page-hd-l { display: flex; align-items: center; gap: 12px; }
+
+.mobile-menu {
+  display: none; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--r-sm); color: var(--text); cursor: pointer; font-size: 15px;
+}
+
+.page-title { font-family: var(--font-serif); font-size: 19px; font-weight: 400; color: var(--white); line-height: 1.2; }
+.page-sub   { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+.page-hd-r { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.hd-badge {
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 5px 11px; border-radius: 999px;
+  border: 1px solid var(--border2); color: var(--muted);
+}
+
+.hd-badge-ai {
+  border-color: rgba(107,159,212,.35);
+  color: var(--blue); background: var(--blue-dim);
+}
+
+.tour-btn {
+  display: flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 14px;
+  border: 1px solid var(--gold-line); border-radius: var(--r-sm);
+  background: var(--gold-glow); color: var(--gold);
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .08em; cursor: pointer;
+  transition: background .2s;
+}
+.tour-btn:hover { background: var(--gold-dim); }
+
+/* ── View ────────────────────────────────────────────────────── */
+.view {
+  display: none; flex-direction: column; gap: 18px;
+  padding: 22px 26px 32px; flex: 1;
+  animation: vfade .22s ease;
+}
+.view.active { display: flex; }
+
+@keyframes vfade { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Grid helpers ────────────────────────────────────────────── */
+.g4  { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; }
+.g2  { display: grid; grid-template-columns: 1.4fr 1fr;     gap: 13px; }
+.g2e { display: grid; grid-template-columns: 1fr 1fr;        gap: 13px; }
+.g3  { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; }
+
+.support-hero {
+  padding: 20px 22px;
+  background: linear-gradient(135deg, rgba(200,168,110,0.12), rgba(107,159,212,0.10));
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+}
+.support-hero-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--white);
+  margin: 6px 0 10px;
+}
+.support-hero-text {
+  font-size: 13.5px;
+  color: var(--soft);
+  line-height: 1.75;
+  max-width: 900px;
+}
+.support-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 16px;
+}
+.support-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.support-card-text {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.support-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.support-item {
+  padding: 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.support-item-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.support-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--bg);
+  background: var(--gold);
+  flex-shrink: 0;
+}
+.support-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+}
+.support-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.support-bullet {
+  font-size: 12px;
+  color: var(--soft);
+}
+.support-flow {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--gold-line);
+  background: var(--gold-glow);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px;
+  transition: border-color .2s;
+}
+.card:hover { border-color: var(--border2); }
+
+/* ── Metric card ─────────────────────────────────────────────── */
+.metric-card { position: relative; overflow: hidden; }
+.metric-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), rgba(200,168,110,.3));
+}
+
+.m-label {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
+}
+.m-value { font-family: var(--font-serif); font-size: 2rem; color: var(--white); line-height: 1; margin-bottom: 7px; }
+.m-foot  { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.m-delta { font-family: var(--font-mono); font-size: 10.5px; margin-top: 4px; }
+.m-delta.up   { color: var(--green); }
+.m-delta.warn { color: var(--amber); }
+.m-delta.bad  { color: var(--red);   }
+
+/* ── Panel ───────────────────────────────────────────────────── */
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+
+.panel-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--border);
+}
+
+.panel-title { font-family: var(--font-serif); font-size: 15px; font-weight: 400; color: var(--white); }
+.panel-sub   { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.panel-body  { padding: 16px 18px; }
+
+/* ── Eyebrow / label ─────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .14em; color: var(--gold);
+}
+
+/* ── Pills ───────────────────────────────────────────────────── */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 999px; padding: 3px 9px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.pill::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.pill-green { background: var(--green-dim); color: var(--green); }
+.pill-amber { background: var(--amber-dim); color: var(--amber); }
+.pill-red   { background: var(--red-dim);   color: var(--red);   }
+.pill-blue  { background: var(--blue-dim);  color: var(--blue);  }
+
+/* ── Table ───────────────────────────────────────────────────── */
+.dt { width: 100%; border-collapse: collapse; }
+.dt th {
+  font-family: var(--font-mono); font-size: 9.5px;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--muted); padding: 9px 11px;
+  border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap;
+}
+.dt td { padding: 12px 11px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.dt tr:last-child td { border-bottom: none; }
+.dt tr:hover td { background: var(--bg4); cursor: pointer; }
+.td-name { font-weight: 500; color: var(--white); }
+.td-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.td-mono { font-family: var(--font-mono); font-size: 12px; }
+
+/* ── Bar chart ───────────────────────────────────────────────── */
+.bar-chart { display: flex; flex-direction: column; gap: 13px; }
+.bar-row { display: grid; grid-template-columns: 172px 1fr 66px; align-items: center; gap: 12px; }
+.bar-lbl { font-size: 13px; color: var(--soft); }
+.bar-val { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: right; }
+.bar-track { height: 7px; background: var(--bg4); border-radius: 999px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--gold), rgba(200,168,110,.5)); transition: width .9s cubic-bezier(.16,1,.3,1); }
+
+/* ── Spark columns ───────────────────────────────────────────── */
+.spark-wrap { padding: 4px 4px 30px; }
+.spark-cols { display: grid; gap: 7px; height: 150px; align-items: end; }
+.spark-col-wrap { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.spark-col {
+  width: 100%; border-radius: 5px 5px 2px 2px; min-height: 10px;
+  background: linear-gradient(180deg, rgba(107,159,212,.75) 0%, rgba(107,159,212,.18) 100%);
+}
+.spark-lbl { font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); white-space: nowrap; }
+
+/* ── Risk card ───────────────────────────────────────────────── */
+.risk-list { display: flex; flex-direction: column; gap: 9px; }
+.risk-card {
+  padding: 13px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  border-left: 3px solid transparent; transition: background .2s;
+}
+.risk-card:hover { background: var(--bg4); }
+.risk-card.high,
+.risk-card.critical { border-left-color: var(--red); }
+.risk-card.medium   { border-left-color: var(--amber); }
+.risk-card.low      { border-left-color: var(--green); }
+.risk-hd  { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 5px; }
+.risk-title { font-size: 13px; font-weight: 500; color: var(--white); }
+.risk-body  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.risk-src   { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+/* ── Narrative insight ───────────────────────────────────────── */
+.narrative-card {
+  padding: 20px 22px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  border-left: 3px solid var(--gold);
+}
+.narrative-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--gold); margin-bottom: 7px; }
+.narrative-text  { font-size: 13.5px; color: var(--soft); line-height: 1.75; }
+
+/* ── Capacity ────────────────────────────────────────────────── */
+.cap-list { display: flex; flex-direction: column; gap: 13px; }
+.cap-row  { }
+.cap-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+.cap-name { font-size: 13px; color: var(--text); font-weight: 500; }
+.cap-pct  { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.cap-issue{ font-size: 11.5px; color: var(--muted); margin-bottom: 5px; }
+.cap-track{ height: 5px; background: var(--bg4); border-radius: 999px; overflow: hidden; }
+.cap-fill { height: 100%; border-radius: 999px; transition: width .9s cubic-bezier(.16,1,.3,1); }
+.cap-fill.overloaded { background: linear-gradient(90deg, var(--red), rgba(212,97,90,.4)); }
+.cap-fill.strained   { background: linear-gradient(90deg, var(--amber), rgba(212,154,68,.4)); }
+.cap-fill.healthy    { background: linear-gradient(90deg, var(--green), rgba(90,173,122,.4)); }
+
+/* ── Drift card ──────────────────────────────────────────────── */
+.drift-list { display: flex; flex-direction: column; gap: 9px; }
+.drift-card { padding: 13px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-sm); }
+.drift-hd   { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 5px; }
+.drift-name { font-size: 13px; font-weight: 500; color: var(--white); }
+.drift-score-wrap { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.drift-score-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.drift-score     { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--red); }
+.drift-statuses  { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px; }
+.drift-body      { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ── Filters ─────────────────────────────────────────────────── */
+.filter-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--bg3); border-bottom: 1px solid var(--border);
+}
+
+.filter-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); white-space: nowrap; }
+
+.filter-sel {
+  appearance: none;
+  background: var(--bg4); border: 1px solid var(--border2);
+  border-radius: var(--r-sm); padding: 7px 28px 7px 10px;
+  color: var(--text); font-size: 12.5px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23636069'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  transition: border-color .2s;
+}
+.filter-sel:focus { outline: none; border-color: var(--gold); }
+
+.filter-clear {
+  font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  padding: 7px 10px;
+  transition: color .2s;
+}
+.filter-clear:hover { color: var(--gold); }
+
+.filter-count {
+  font-family: var(--font-mono); font-size: 10px; color: var(--muted);
+  margin-left: auto;
+}
+
+/* ── Anomaly ─────────────────────────────────────────────────── */
+.anomaly-list { display: flex; flex-direction: column; gap: 9px; }
+.anomaly-item {
+  display: flex; gap: 10px; padding: 11px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-sm);
+}
+.anomaly-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.anomaly-text { font-size: 13px; color: var(--soft); line-height: 1.5; }
+
+/* ── Milestone ───────────────────────────────────────────────── */
+.ms-list { display: flex; flex-direction: column; gap: 7px; }
+.ms-row  { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--soft); }
+.ms-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ms-dot.done     { background: var(--green); }
+.ms-dot.on_track { background: var(--blue); }
+.ms-dot.at_risk  { background: var(--red); }
+.ms-name { flex: 1; }
+.ms-date { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+/* ── Ratio ───────────────────────────────────────────────────── */
+.ratio-good { color: var(--green); font-weight: 600; }
+.ratio-ok   { color: var(--amber); font-weight: 600; }
+.ratio-bad  { color: var(--red);   font-weight: 600; }
+
+/* ── Copilot ─────────────────────────────────────────────────── */
+.copilot-layout { display: grid; grid-template-columns: 1.3fr .7fr; gap: 14px; align-items: start; }
+.copilot-main   { display: flex; flex-direction: column; gap: 13px; }
+
+.chat-win { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+
+.chat-msgs {
+  display: flex; flex-direction: column;
+  max-height: 420px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--bg4) transparent;
+}
+
+.chat-msg { padding: 16px 18px; border-bottom: 1px solid var(--border); animation: vfade .2s ease; }
+.chat-msg:last-child { border-bottom: none; }
+.chat-msg.assistant { background: var(--bg2); }
+.chat-msg.user      { background: var(--bg3); }
+
+.msg-role { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 5px; }
+.msg-role.ai { color: var(--gold); }
+.msg-body { font-size: 13.5px; color: var(--text); line-height: 1.65; }
+
+.msg-citations { margin-top: 11px; display: flex; flex-direction: column; gap: 5px; }
+.citation-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 11px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+}
+.cit-src   { font-family: var(--font-mono); font-size: 10px; color: var(--blue); text-transform: uppercase; letter-spacing: .07em; }
+.cit-label { font-size: 12px; color: var(--soft); flex: 1; }
+.cit-time  { font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); }
+
+.conf-bar  { display: flex; align-items: center; gap: 9px; margin-top: 9px; }
+.conf-lbl  { font-family: var(--font-mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
+.conf-track{ flex: 1; height: 4px; background: var(--bg4); border-radius: 999px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 999px; background: var(--green); }
+.conf-val  { font-family: var(--font-mono); font-size: 10px; color: var(--green); white-space: nowrap; }
+
+.msg-actions { margin-top: 9px; display: flex; flex-direction: column; gap: 5px; }
+.action-item { display: flex; align-items: flex-start; gap: 7px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.action-item::before { content: '→'; color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+
+.access-blocked { padding: 14px; background: var(--red-dim); border: 1px solid rgba(212,97,90,.3); border-radius: var(--r-sm); color: var(--red); font-size: 13px; }
+
+.chat-input-area { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; }
+.chat-textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--r-sm); padding: 11px 13px;
+  color: var(--text); font-size: 13.5px; resize: none; line-height: 1.5;
+  transition: border-color .2s;
+}
+.chat-textarea:focus { outline: none; border-color: var(--gold); }
+.chat-textarea::placeholder { color: var(--muted); }
+
+.chat-actions { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+
+.btn-primary {
+  padding: 9px 18px; background: var(--gold); color: #0e0900;
+  border: none; border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s;
+}
+.btn-primary:hover { background: #d4b47a; }
+
+.btn-secondary {
+  padding: 9px 14px; background: var(--bg3); color: var(--soft);
+  border: 1px solid var(--border2); border-radius: var(--r-sm);
+  font-size: 13px; cursor: pointer; transition: background .2s, color .2s;
+}
+.btn-secondary:hover { background: var(--bg4); color: var(--text); }
+
+.prompt-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+.prompt-chip {
+  padding: 6px 11px; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 999px; font-size: 11.5px; color: var(--soft); cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.prompt-chip:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+
+.copilot-info { display: flex; flex-direction: column; gap: 13px; }
+
+.info-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 17px; }
+.info-card-title { font-family: var(--font-serif); font-size: 14px; color: var(--white); margin-bottom: 13px; }
+.info-items { display: flex; flex-direction: column; gap: 11px; }
+.info-item-title { font-size: 13px; font-weight: 500; color: var(--white); margin-bottom: 3px; }
+.info-item-body  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.role-info { padding: 11px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-sm); }
+.role-tag  { font-family: var(--font-mono); font-size: 11px; color: var(--gold); margin-bottom: 7px; }
+.scope-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.scope-chip {
+  font-family: var(--font-mono); font-size: 10px;
+  padding: 3px 8px; border-radius: 999px;
+  background: var(--gold-dim); color: var(--gold);
+  border: 1px solid rgba(200,168,110,.25);
+}
+.scope-chip.blocked { background: var(--red-dim); color: var(--red); border-color: rgba(212,97,90,.25); }
+
+/* ── Spinner ─────────────────────────────────────────────────── */
+.spinner {
+  display: inline-block; width: 13px; height: 13px;
+  border: 2px solid var(--border2); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin .7s linear infinite;
+  vertical-align: middle; margin-right: 5px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── MODAL ───────────────────────────────────────────────────── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(5,7,14,.82); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; animation: mfade .2s ease; }
+@keyframes mfade { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r-lg); width: min(760px, 100%);
+  max-height: 88dvh; overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: mslide .25s cubic-bezier(.16,1,.3,1);
+  scrollbar-width: thin; scrollbar-color: var(--bg4) transparent;
+}
+@keyframes mslide { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-hd {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 14px; padding: 24px 24px 20px;
+  border-bottom: 1px solid var(--border); position: sticky; top: 0;
+  background: var(--bg2); z-index: 1;
+}
+
+.modal-id { font-family: var(--font-mono); font-size: 10px; color: var(--gold); letter-spacing: .07em; margin-bottom: 4px; }
+.modal-title { font-family: var(--font-serif); font-size: 20px; color: var(--white); }
+.modal-tags  { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.modal-tag   { font-family: var(--font-mono); font-size: 10px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border2); color: var(--soft); background: var(--bg3); }
+
+.modal-close {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--border2); background: var(--bg3);
+  color: var(--soft); cursor: pointer; font-size: 16px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .2s, border-color .2s;
+}
+.modal-close:hover { color: var(--text); border-color: var(--border3); }
+
+.modal-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+.modal-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+
+.modal-stat {
+  padding: 14px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+}
+.modal-stat-lbl { font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; }
+.modal-stat-val { font-family: var(--font-serif); font-size: 1.6rem; color: var(--white); line-height: 1; }
+
+.modal-section-title { font-family: var(--font-serif); font-size: 15px; color: var(--white); margin-bottom: 12px; }
+
+.modal-notes {
+  padding: 14px; background: var(--bg3);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  font-size: 13.5px; color: var(--soft); line-height: 1.65;
+  border-left: 3px solid var(--gold);
+}
+
+/* ── TOUR TOOLTIP ────────────────────────────────────────────── */
+.tour-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  pointer-events: none;
+}
+.tour-overlay.open { display: block; }
+
+.tour-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(5,7,14,.7); pointer-events: all;
+}
+
+.tour-tooltip {
+  position: absolute; z-index: 301;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 18px 20px;
+  width: min(320px, calc(100vw - 32px));
+  box-shadow: var(--shadow-lg);
+  pointer-events: all;
+  animation: mslide .25s cubic-bezier(.16,1,.3,1);
+}
+
+.tour-step  { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.tour-title { font-family: var(--font-serif); font-size: 16px; color: var(--white); margin-bottom: 8px; }
+.tour-text  { font-size: 13px; color: var(--soft); line-height: 1.65; margin-bottom: 14px; }
+
+.tour-actions { display: flex; align-items: center; gap: 8px; }
+
+.tour-next, .tour-skip {
+  border: none; border-radius: var(--r-sm); cursor: pointer;
+  font-size: 12px; padding: 8px 14px; transition: background .2s;
+}
+.tour-next { background: var(--gold); color: #0e0900; font-weight: 600; }
+.tour-next:hover { background: #d4b47a; }
+.tour-skip { background: var(--bg3); color: var(--soft); border: 1px solid var(--border2); }
+.tour-skip:hover { color: var(--text); }
+
+.tour-dots { display: flex; gap: 5px; margin-left: auto; }
+.tour-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border2); }
+.tour-dot.active { background: var(--gold); }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .g4 { grid-template-columns: repeat(2,1fr); }
+  .g2, .g2e { grid-template-columns: 1fr; }
+  .copilot-layout { grid-template-columns: 1fr; }
+  .bar-row { grid-template-columns: 140px 1fr 58px; }
+  .modal-stats { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 840px) {
+  .shell { grid-template-columns: 1fr; }
+
+  .sidebar {
+    position: fixed; left: -268px; top: 0; height: 100dvh;
+    transition: left .28s cubic-bezier(.16,1,.3,1);
+    z-index: 100; box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { left: 0; }
+
+  .mobile-menu { display: flex; }
+  .view { padding: 14px 14px 24px; }
+  .page-hd { padding: 14px 16px; }
+  .g4 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr; }
+  .tour-btn span { display: none; }
+}
+
+@media (max-width: 500px) {
+  .g4 { grid-template-columns: 1fr; }
+  .page-hd-r .hd-badge { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="brand-mark">PP</div>
+        <div>
+          <span class="brand-name">Portfolio Pulse</span>
+          <span class="brand-sub">AI Portfolio Intelligence</span>
+        </div>
+      </div>
+
+      <div class="role-wrap">
+        <label class="field-lbl" for="role-sel">Demo persona</label>
+        <div class="sel-wrap">
+          <select id="role-sel" class="role-sel">
+            <option value="executive">Executive</option>
+            <option value="pmo">PMO</option>
+            <option value="engineering">Engineering</option>
+            <option value="finance">Finance</option>
+          </select>
+          <span class="sel-arrow">▾</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <div class="nav-divider">Views</div>
+        <button class="nav-btn active" data-view="overview"   type="button"><span class="nav-icon">◈</span>Executive View</button>
+        <button class="nav-btn"        data-view="operations" type="button"><span class="nav-icon">⬡</span>Portfolio Ops</button>
+        <button class="nav-btn"        data-view="finops"     type="button"><span class="nav-icon">◇</span>FinOps</button>
+        <button class="nav-btn"        data-view="copilot"    type="button"><span class="nav-icon">✦</span>AI Copilot</button>
+        <button class="nav-btn"        data-view="support"    type="button"><span class="nav-icon">◫</span>How It Works</button>
+      </nav>
+    </div>
+
+    <div class="sidebar-bottom">
+      <p class="fresh-label">Data freshness</p>
+      <div class="fresh-list" id="fresh-list"></div>
+      <span class="demo-chip">Fictional data · Portfolio safe</span>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ────────────────────────────────────────────── -->
+  <main class="main">
+
+    <header class="page-hd">
+      <div class="page-hd-l">
+        <button class="mobile-menu" id="mobile-menu" type="button" aria-label="Toggle menu">☰</button>
+        <div>
+          <h1 class="page-title" id="view-title">Executive Portfolio Overview</h1>
+          <p class="page-sub"   id="view-sub">Track spend, value delivered, top risks, and status drift.</p>
+        </div>
+      </div>
+      <div class="page-hd-r">
+        <span class="hd-badge">Interactive Prototype</span>
+        <span class="hd-badge hd-badge-ai">AI Copilot</span>
+        <button class="tour-btn" id="tour-btn" type="button">
+          <span>▶</span><span>Play Demo Tour</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="view active" id="overview-view"></div>
+    <div class="view"        id="operations-view"></div>
+    <div class="view"        id="finops-view"></div>
+    <div class="view"        id="copilot-view"></div>
+    <div class="view"        id="support-view"></div>
+
+  </main>
+</div>
+
+<!-- ── MODAL ───────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal" id="modal">
+    <div class="modal-hd">
+      <div>
+        <p class="modal-id" id="modal-id"></p>
+        <h2 class="modal-title" id="modal-title"></h2>
+        <div class="modal-tags" id="modal-tags"></div>
+      </div>
+      <button class="modal-close" id="modal-close" type="button" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ── TOUR ─────────────────────────────────────────────────── -->
+<div class="tour-overlay" id="tour-overlay">
+  <div class="tour-backdrop" id="tour-backdrop"></div>
+  <div class="tour-tooltip" id="tour-tooltip">
+    <p class="tour-step"  id="tour-step"></p>
+    <p class="tour-title" id="tour-title"></p>
+    <p class="tour-text"  id="tour-text"></p>
+    <div class="tour-actions">
+      <button class="tour-next" id="tour-next" type="button">Next</button>
+      <button class="tour-skip" id="tour-skip" type="button">Skip tour</button>
+      <div class="tour-dots" id="tour-dots"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════ */
+const DATA = {
+  freshness: {
+    jira: "2026-03-17T15:30:00Z", github: "2026-03-17T15:15:00Z",
+    awsCost: "2026-03-17T07:00:00Z", finance: "2026-03-17T13:00:00Z",
+    slack: "2026-03-17T14:45:00Z", confluence: "2026-03-17T14:10:00Z"
+  },
+  summary: {
+    totalSpend: 100.0, totalBudget: 112.0, forecastSpend: 108.4,
+    deliveredValue: 30.0, activeInitiatives: 18, atRiskInitiatives: 6, statusDriftCount: 3,
+    topSpendCategories: [
+      { label: "Platform & infrastructure", amount: 42 },
+      { label: "Product use cases",         amount: 31 },
+      { label: "Data foundation",           amount: 18 },
+      { label: "Vendors & pilots",          amount:  9 }
+    ],
+    topRisks: [
+      { title: "Hidden delivery drift in Model Gateway", severity: "high",     sourceType: "slack_confluence", summary: "Informal delivery signals are worsening while formal status remains green." },
+      { title: "Sales knowledge search adoption risk",   severity: "critical", sourceType: "jira_review",      summary: "Search permissions issues are suppressing adoption and value realization." }
+    ]
+  },
+  monthlySpend: [
+    { period: "2025-10", amount: 13.2 }, { period: "2025-11", amount: 14.8 },
+    { period: "2025-12", amount: 15.1 }, { period: "2026-01", amount: 17.4 },
+    { period: "2026-02", amount: 18.7 }, { period: "2026-03", amount: 20.8 }
+  ],
+  initiatives: [
+    { id: "INIT-104", name: "GenAI Support Copilot",    businessUnit: "Customer Operations", owner: "Rina Shah",    team: "CX AI Products",       status: "Green", healthStatus: "green", budgetAmount: 12.0, actualSpend: 10.8, forecastAmount: 11.6, deliveryConfidence: 88, valueRealized: 8.4, notes: "Strong adoption and measurable deflection in support queues.", milestones: [{ name: "Pilot launch",          targetDate: "2025-12-12", status: "done" }, { name: "Tier 1 rollout",         targetDate: "2026-02-21", status: "done"     }, { name: "Tier 2 rollout",   targetDate: "2026-04-15", status: "on_track" }] },
+    { id: "INIT-118", name: "Enterprise Model Gateway", businessUnit: "Shared Platforms",    owner: "Jon Mercer",   team: "ML Platform",           status: "Green", healthStatus: "amber", budgetAmount: 19.0, actualSpend: 22.6, forecastAmount: 25.1, deliveryConfidence: 61, valueRealized: 5.1, notes: "Formal status stayed green, but unstructured updates show vendor delays and token cost concerns.", milestones: [{ name: "Gateway v1",            targetDate: "2026-01-31", status: "done" }, { name: "Vendor failover",        targetDate: "2026-03-30", status: "at_risk"  }, { name: "Cost guardrails",  targetDate: "2026-04-18", status: "at_risk"  }] },
+    { id: "INIT-121", name: "Contract Intelligence",    businessUnit: "Legal",               owner: "Aparna Mehta", team: "Legal AI",               status: "Amber", healthStatus: "amber", budgetAmount:  7.5, actualSpend:  7.1, forecastAmount:  8.0, deliveryConfidence: 73, valueRealized: 4.3, notes: "Near target but requires data quality work for broader rollout.", milestones: [{ name: "Document ingestion",    targetDate: "2026-01-19", status: "done" }, { name: "Clause review assistant",targetDate: "2026-03-28", status: "on_track" }] },
+    { id: "INIT-133", name: "Inference Cost Optimizer", businessUnit: "Shared Platforms",    owner: "Leo Bennett",  team: "FinOps Engineering",     status: "Amber", healthStatus: "green", budgetAmount:  5.8, actualSpend:  4.9, forecastAmount:  5.5, deliveryConfidence: 84, valueRealized: 6.8, notes: "Early optimizations reduced inference waste by 14%.", milestones: [{ name: "Reservation analysis",  targetDate: "2026-01-14", status: "done" }, { name: "Autoscaling rollout",    targetDate: "2026-03-26", status: "on_track" }] },
+    { id: "INIT-140", name: "Knowledge Search for Sales",businessUnit: "Revenue",            owner: "Kim Alvarez",  team: "Revenue Enablement",     status: "Red",   healthStatus: "red",   budgetAmount:  8.2, actualSpend:  8.9, forecastAmount: 10.4, deliveryConfidence: 41, valueRealized: 1.2, notes: "Adoption stalled and sales content permissions remain unresolved.", milestones: [{ name: "Content ingestion",    targetDate: "2026-01-08", status: "done" }, { name: "Permission cleanup",     targetDate: "2026-03-10", status: "at_risk"  }, { name: "National rollout", targetDate: "2026-04-20", status: "at_risk"  }] }
+  ],
+  risks: [
+    { initiativeId: "INIT-118", initiativeName: "Enterprise Model Gateway",  formalStatus: "Green", inferredRiskLevel: "High",   driftScore: 82, explanation: "Five negative delivery mentions in Slack, one scope reduction in steering deck, and rising token cost variance.", citations: [{ source: "Slack", label: "ML Platform Slack Thread", freshness: "2026-03-17T14:45:00Z" }, { source: "Confluence", label: "Steering Committee Week 10", freshness: "2026-03-17T14:10:00Z" }] },
+    { initiativeId: "INIT-136", initiativeName: "Document Intelligence Core",formalStatus: "Green", inferredRiskLevel: "Medium", driftScore: 68, explanation: "Escalating comments on data readiness and delayed legal review.", citations: [] },
+    { initiativeId: "INIT-127", initiativeName: "AI Experiment Hub",         formalStatus: "Amber", inferredRiskLevel: "High",   driftScore: 74, explanation: "Budget uncertainty and unclear business KPIs across four pilots.", citations: [] }
+  ],
+  teamCapacity: [
+    { team: "ML Platform",             loadPercent: 129, issue: "On-call load and vendor integration churn", condition: "overloaded" },
+    { team: "Shared Data Engineering", loadPercent: 122, issue: "Dataset readiness bottleneck",              condition: "overloaded" },
+    { team: "CX AI Products",          loadPercent:  94, issue: "Healthy staffing balance",                  condition: "healthy"    },
+    { team: "FinOps Engineering",       loadPercent:  87, issue: "Available capacity for optimization work",  condition: "healthy"    }
+  ],
+  finopsByTeam: [
+    { group: "ML Platform",             amount: 28.0 },
+    { group: "CX AI Products",          amount: 18.5 },
+    { group: "Shared Data Engineering", amount: 15.7 },
+    { group: "Revenue Enablement",      amount: 12.8 },
+    { group: "Legal AI",                amount:  8.4 }
+  ],
+  anomalies: [
+    "Token spend on Enterprise Model Gateway is up 23% month-over-month with flat business usage.",
+    "Idle GPU reservation in Shared Platforms is costing an estimated $410K per quarter.",
+    "Inference Cost Optimizer is the strongest cost-to-value performer in the portfolio."
+  ],
+  documents: [
+    { id: "doc-1", title: "Steering Committee Week 10", source: "Confluence", initiativeId: "INIT-118", freshness: "2026-03-17T14:10:00Z" },
+    { id: "doc-2", title: "ML Platform Slack Thread",    source: "Slack",      initiativeId: "INIT-118", freshness: "2026-03-17T14:45:00Z" },
+    { id: "doc-3", title: "Portfolio Status Report Q1",  source: "Confluence", initiativeId: "GLOBAL",   freshness: "2026-03-17T13:00:00Z" },
+    { id: "doc-4", title: "FinOps Weekly Summary",       source: "Confluence", initiativeId: "GLOBAL",   freshness: "2026-03-17T12:00:00Z" },
+    { id: "doc-5", title: "Sales KS Jira Board",         source: "Jira",       initiativeId: "INIT-140", freshness: "2026-03-17T11:30:00Z" }
+  ]
+};
+
+const VIEWS = {
+  overview:   { title: "Executive Portfolio Overview",  sub: "Track spend, value delivered, top risks, and status drift across the AI portfolio." },
+  operations: { title: "Portfolio Operations",          sub: "Delivery health, team capacity, milestone pressure, and hidden signals." },
+  finops:     { title: "FinOps & Delivery Efficiency",  sub: "Connect cost, platform usage, and shipping outcomes to focus investment." },
+  copilot:    { title: "AI Copilot",                    sub: "Ask grounded questions across structured portfolio data and unstructured updates." },
+  support:    { title: "How Final Reporting Is Supported", sub: "See the source systems, normalization, team brain, agents, and review model behind the final reporting view." }
+};
+
+const ROLE_ACCESS = {
+  executive:   ["overview","operations","finops","copilot","support"],
+  pmo:         ["overview","operations","copilot","support"],
+  engineering: ["operations","finops","copilot","support"],
+  finance:     ["overview","finops","copilot","support"]
+};
+
+const PROMPTS = [
+  "Where did our AI budget go this quarter?",
+  "Which initiatives are over budget and behind schedule?",
+  "What risks are emerging before formal status changes?",
+  "Which teams need help right now?"
+];
+
+const TOUR_STEPS = [
+  { title: "Executive Portfolio View",   text: "Start here for the full portfolio picture — spend, realized value, risk signals, and status drift in one screen. Switch personas using the role selector.",              anchor: "overview-view" },
+  { title: "Role-based access",          text: "Switch between Executive, PMO, Engineering, and Finance personas. Each sees only the views and data relevant to their role.",                                            anchor: "role-sel" },
+  { title: "Initiative detail",          text: "Click any row in the initiatives table to open a full detail panel — milestones, spend trend, drift signals, and source citations.",                                     anchor: "overview-view" },
+  { title: "Status drift detection",     text: "The Portfolio Ops view surfaces initiatives where formal status diverges from inferred risk — catching problems before they appear in reporting.",                        anchor: "operations-view" },
+  { title: "AI Copilot",                 text: "Ask grounded questions about spend, risk, and delivery. Responses are role-aware and return structured citations from source records.",                                   anchor: "copilot-view" },
+  { title: "How It Works",               text: "This support view explains how source systems, normalization, team context, agents, and human review produce the final reporting leadership sees.",                        anchor: "support-view" }
+];
+
+/* ══════════════════════════════════════════════════════════
+   STATE & HELPERS
+══════════════════════════════════════════════════════════ */
+const state = { role: "executive", currentView: "overview", filters: { businessUnit: "all", health: "all" } };
+
+const $ = id => document.getElementById(id);
+const fmt$  = v => `$${Number(v).toFixed(1)}M`;
+const fmtPct= v => `${v}%`;
+const fmtT  = iso => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+function pillCls(s) {
+  const k = String(s).toLowerCase();
+  if (k.includes("green")  || k.includes("low")    || k.includes("healthy"))   return "green";
+  if (k.includes("amber")  || k.includes("medium") || k.includes("strained"))  return "amber";
+  if (k.includes("red")    || k.includes("high")   || k.includes("critical")   || k.includes("overloaded")) return "red";
+  return "blue";
+}
+
+function pill(t) { return `<span class="pill pill-${pillCls(t)}">${t}</span>`; }
+
+function ratioCls(r) {
+  if (r >= 1.2) return "ratio-good";
+  if (r >= 0.7) return "ratio-ok";
+  return "ratio-bad";
+}
+
+function filteredInitiatives() {
+  return DATA.initiatives.filter(i => {
+    const buOk = state.filters.businessUnit === "all" || i.businessUnit === state.filters.businessUnit;
+    const hOk  = state.filters.health === "all" || i.healthStatus === state.filters.health;
+    return buOk && hOk;
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   FRESHNESS SIDEBAR
+══════════════════════════════════════════════════════════ */
+function renderFreshness() {
+  $("fresh-list").innerHTML = Object.entries(DATA.freshness)
+    .map(([src, iso]) => `
+      <div class="fresh-row">
+        <span class="fresh-dot"></span>
+        <span class="fresh-src">${src}</span>
+        <span class="fresh-time">${fmtT(iso)}</span>
+      </div>`).join("");
+}
+
+/* ══════════════════════════════════════════════════════════
+   OVERVIEW
+══════════════════════════════════════════════════════════ */
+function renderOverview() {
+  const s = DATA.summary;
+  const maxCat  = Math.max(...s.topSpendCategories.map(c => c.amount));
+  const maxSpark = Math.max(...DATA.monthlySpend.map(p => p.amount));
+
+  $("overview-view").innerHTML = `
+    <div class="narrative-card">
+      <p class="narrative-label">Executive Narrative</p>
+      <p class="narrative-text">Platform investment is climbing faster than realized value. Shared platform spend dominates the portfolio, while the strongest value signals are concentrated in a smaller set of productized use cases. The current leadership question is where to protect investment versus where to tighten accountability.</p>
+    </div>
+
+    <div class="g4">
+      ${[
+        { label:"AI Spend YTD",       value:fmt$(s.totalSpend),    foot:`Against ${fmt$(s.totalBudget)} budget`,            delta:"▲ $8.4M vs prior quarter",      dc:"warn" },
+        { label:"Forecast Spend",      value:fmt$(s.forecastSpend), foot:"At current burn trend",                            delta:"▼ $3.6M below ceiling",         dc:"up"   },
+        { label:"Value Delivered",     value:fmt$(s.deliveredValue),foot:"Revenue uplift + productivity savings",            delta:"0.30x cost-to-value ratio",     dc:"warn" },
+        { label:"Status Drift Flags",  value:s.statusDriftCount,    foot:"Formal reporting diverges from inferred risk",     delta:"3 need immediate review",       dc:"bad"  }
+      ].map(m => `
+        <div class="card metric-card">
+          <p class="m-label">${m.label}</p>
+          <p class="m-value">${m.value}</p>
+          <p class="m-foot">${m.foot}</p>
+          <p class="m-delta ${m.dc}">${m.delta}</p>
+        </div>`).join("")}
+    </div>
+
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-hd">
+          <div><p class="panel-title">Spend allocation</p><p class="panel-sub">How the portfolio consumes its ${fmt$(s.totalBudget)} budget</p></div>
+        </div>
+        <div class="panel-body">
+          <div class="bar-chart">
+            ${s.topSpendCategories.map(c => `
+              <div class="bar-row">
+                <span class="bar-lbl">${c.label}</span>
+                <div class="bar-track"><div class="bar-fill" style="width:${(c.amount/maxCat)*100}%"></div></div>
+                <span class="bar-val">${c.amount}%</span>
+              </div>`).join("")}
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hd">
+          <div><p class="panel-title">Monthly spend trend</p><p class="panel-sub">Recent growth in AI investment ($M)</p></div>
+        </div>
+        <div class="panel-body spark-wrap">
+          <div class="spark-cols" style="grid-template-columns:repeat(${DATA.monthlySpend.length},1fr)">
+            ${DATA.monthlySpend.map(p => `
+              <div class="spark-col-wrap">
+                <div class="spark-col" style="height:${Math.round((p.amount/maxSpark)*140)}px" title="${fmt$(p.amount)}"></div>
+                <span class="spark-lbl">${p.period.slice(5)}</span>
+              </div>`).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="initiatives-panel">
+      <div class="panel-hd">
+        <div><p class="panel-title">Top initiatives</p><p class="panel-sub">Click any row to open full detail</p></div>
+      </div>
+      <div class="filter-bar" id="overview-filter-bar">
+        <span class="filter-label">Filter:</span>
+        <select class="filter-sel" id="bu-filter" aria-label="Business unit filter">
+          <option value="all">All business units</option>
+          ${[...new Set(DATA.initiatives.map(i => i.businessUnit))].map(bu => `<option value="${bu}">${bu}</option>`).join("")}
+        </select>
+        <select class="filter-sel" id="health-filter" aria-label="Health status filter">
+          <option value="all">All health</option>
+          <option value="green">Green</option>
+          <option value="amber">Amber</option>
+          <option value="red">Red</option>
+        </select>
+        <button class="filter-clear" id="clear-filters" type="button">Clear filters</button>
+        <span class="filter-count" id="filter-count"></span>
+      </div>
+      <div id="initiatives-table-wrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd">
+        <div><p class="panel-title">Emerging risks</p><p class="panel-sub">Signals leadership should review this week</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="risk-list">
+          ${s.topRisks.map(r => `
+            <div class="risk-card ${r.severity}">
+              <div class="risk-hd"><span class="risk-title">${r.title}</span>${pill(r.severity)}</div>
+              <p class="risk-body">${r.summary}</p>
+              <p class="risk-src">Source: ${r.sourceType}</p>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  renderInitiativesTable();
+  bindFilters();
+}
+
+function renderInitiativesTable() {
+  const items = filteredInitiatives();
+  $("filter-count").textContent = `${items.length} of ${DATA.initiatives.length} shown`;
+
+  $("initiatives-table-wrap").innerHTML = `
+    <table class="dt">
+      <thead><tr>
+        <th>Initiative</th><th>Spend</th><th>Value</th><th>Health</th><th>Confidence</th><th>Trend</th>
+      </tr></thead>
+      <tbody>
+        ${items.map(i => `
+          <tr data-id="${i.id}" class="init-row">
+            <td><p class="td-name">${i.name}</p><p class="td-sub">${i.businessUnit}</p></td>
+            <td class="td-mono">${fmt$(i.actualSpend)}</td>
+            <td class="td-mono">${fmt$(i.valueRealized)}</td>
+            <td>${pill(i.healthStatus)}</td>
+            <td class="td-mono">${fmtPct(i.deliveryConfidence)}</td>
+            <td class="td-mono" style="color:${i.actualSpend > i.budgetAmount ? 'var(--red)' : 'var(--green)'}">${i.actualSpend > i.budgetAmount ? "▲ Over" : "▼ On track"}</td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
+
+  document.querySelectorAll(".init-row").forEach(row => {
+    row.addEventListener("click", () => openModal(row.dataset.id));
+  });
+}
+
+function bindFilters() {
+  $("bu-filter").addEventListener("change", e => { state.filters.businessUnit = e.target.value; renderInitiativesTable(); });
+  $("health-filter").addEventListener("change", e => { state.filters.health = e.target.value; renderInitiativesTable(); });
+  $("clear-filters").addEventListener("click", () => {
+    state.filters = { businessUnit: "all", health: "all" };
+    $("bu-filter").value = "all";
+    $("health-filter").value = "all";
+    renderInitiativesTable();
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   OPERATIONS
+══════════════════════════════════════════════════════════ */
+function renderOperations() {
+  $("operations-view").innerHTML = `
+    <div class="g4">
+      ${[
+        { label:"Active Initiatives",   value:DATA.summary.activeInitiatives,  foot:"Platform, product, and foundation work",        delta:"18 in flight",           dc:"up"  },
+        { label:"At-Risk Initiatives",  value:DATA.summary.atRiskInitiatives,  foot:"Three need executive attention this month",      delta:"▲ 2 new this week",      dc:"bad" },
+        { label:"Over-Capacity Teams",  value:2,                               foot:"Shared services constraining throughput",        delta:"129% and 122% load",     dc:"bad" },
+        { label:"Blocked Milestones",   value:5,                               foot:"Vendor latency and data readiness as causes",    delta:"Mostly in Q2 window",    dc:"warn"}
+      ].map(m => `
+        <div class="card metric-card">
+          <p class="m-label">${m.label}</p>
+          <p class="m-value">${m.value}</p>
+          <p class="m-foot">${m.foot}</p>
+          <p class="m-delta ${m.dc}">${m.delta}</p>
+        </div>`).join("")}
+    </div>
+
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-hd">
+          <div><p class="panel-title">Initiative health</p><p class="panel-sub">Click any row to open full detail</p></div>
+        </div>
+        <table class="dt">
+          <thead><tr>
+            <th>Initiative</th><th>Owner</th><th>Health</th><th>Confidence</th><th>At-risk milestones</th>
+          </tr></thead>
+          <tbody>
+            ${DATA.initiatives.map(i => {
+              const at = i.milestones.filter(m => m.status === "at_risk").length;
+              return `<tr class="init-row" data-id="${i.id}">
+                <td><p class="td-name">${i.name}</p><p class="td-sub">${i.businessUnit}</p></td>
+                <td>${i.owner}</td>
+                <td>${pill(i.healthStatus)}</td>
+                <td class="td-mono">${fmtPct(i.deliveryConfidence)}</td>
+                <td>${at > 0 ? `<span class="pill pill-red">${at} at risk</span>` : `<span class="pill pill-green">On track</span>`}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hd"><div><p class="panel-title">Team capacity</p><p class="panel-sub">Load vs sustainable throughput</p></div></div>
+        <div class="panel-body">
+          <div class="cap-list">
+            ${DATA.teamCapacity.map(t => `
+              <div class="cap-row">
+                <div class="cap-meta">
+                  <span class="cap-name">${t.team}</span>
+                  <span class="cap-pct">${t.loadPercent}%</span>
+                  ${pill(t.condition)}
+                </div>
+                <p class="cap-issue">${t.issue}</p>
+                <div class="cap-track"><div class="cap-fill ${t.condition}" style="width:${Math.min(t.loadPercent,100)}%"></div></div>
+              </div>`).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><p class="panel-title">Status drift signals</p><p class="panel-sub">Initiatives where formal reporting diverges from inferred risk</p></div></div>
+      <div class="panel-body">
+        <div class="drift-list">
+          ${DATA.risks.map(r => `
+            <div class="drift-card">
+              <div class="drift-hd">
+                <span class="drift-name">${r.initiativeName}</span>
+                <div class="drift-score-wrap">
+                  <span class="drift-score-lbl">Drift score</span>
+                  <span class="drift-score">${r.driftScore}</span>
+                </div>
+              </div>
+              <div class="drift-statuses">
+                <span>Formal: ${pill(r.formalStatus)}</span>
+                <span>Inferred: ${pill(r.inferredRiskLevel)}</span>
+              </div>
+              <p class="drift-body">${r.explanation}</p>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><p class="panel-title">Milestone detail by initiative</p><p class="panel-sub">Key delivery checkpoints and current status</p></div></div>
+      <div class="panel-body">
+        <div class="g3">
+          ${DATA.initiatives.map(i => `
+            <div class="card" style="padding:14px;cursor:pointer;" class="init-row" data-id="${i.id}" onclick="openModal('${i.id}')">
+              <p style="font-size:12.5px;font-weight:500;color:var(--white);margin-bottom:3px;">${i.name}</p>
+              <p style="font-size:11px;color:var(--muted);margin-bottom:11px;">${i.businessUnit}</p>
+              <div class="ms-list">
+                ${i.milestones.map(m => `
+                  <div class="ms-row">
+                    <span class="ms-dot ${m.status}"></span>
+                    <span class="ms-name">${m.name}</span>
+                    <span class="ms-date">${m.targetDate}</span>
+                  </div>`).join("")}
+              </div>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll(".init-row").forEach(row => {
+    row.addEventListener("click", () => openModal(row.dataset.id));
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   FINOPS
+══════════════════════════════════════════════════════════ */
+function renderFinops() {
+  const maxTeam = Math.max(...DATA.finopsByTeam.map(t => t.amount));
+  const overage = DATA.summary.forecastSpend - DATA.summary.totalBudget;
+
+  $("finops-view").innerHTML = `
+    <div class="g4">
+      ${[
+        { label:"Total AI Spend YTD",  value:fmt$(DATA.summary.totalSpend),    foot:`${fmt$(DATA.summary.totalBudget)} budget`,   delta:"89% of budget consumed",     dc:"warn" },
+        { label:"Forecast Overage",    value:fmt$(overage),                    foot:"Against annual budget ceiling",               delta:"▲ $3.6M projected overrun",  dc:"bad"  },
+        { label:"Value Delivered",     value:fmt$(DATA.summary.deliveredValue), foot:"Value realization ratio",                    delta:"0.30x cost-to-value",        dc:"warn" },
+        { label:"Cost Anomalies",      value:DATA.anomalies.length,            foot:"Flagged for leadership review",               delta:"Action recommended on 2",    dc:"bad"  }
+      ].map(m => `
+        <div class="card metric-card">
+          <p class="m-label">${m.label}</p>
+          <p class="m-value">${m.value}</p>
+          <p class="m-foot">${m.foot}</p>
+          <p class="m-delta ${m.dc}">${m.delta}</p>
+        </div>`).join("")}
+    </div>
+
+    <div class="g2">
+      <div class="panel">
+        <div class="panel-hd"><div><p class="panel-title">Spend by team</p><p class="panel-sub">Current month AI investment by function ($M)</p></div></div>
+        <div class="panel-body">
+          <div class="bar-chart">
+            ${DATA.finopsByTeam.map(t => `
+              <div class="bar-row">
+                <span class="bar-lbl">${t.group}</span>
+                <div class="bar-track"><div class="bar-fill" style="width:${(t.amount/maxTeam)*100}%"></div></div>
+                <span class="bar-val">${fmt$(t.amount)}</span>
+              </div>`).join("")}
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hd"><div><p class="panel-title">Cost anomalies</p><p class="panel-sub">Signals to act on before next budget cycle</p></div></div>
+        <div class="panel-body">
+          <div class="anomaly-list">
+            ${DATA.anomalies.map((a,i) => `
+              <div class="anomaly-item">
+                <span class="anomaly-icon">${["⚠","◈","✦"][i%3]}</span>
+                <span class="anomaly-text">${a}</span>
+              </div>`).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd"><div><p class="panel-title">Cost-to-value by initiative</p><p class="panel-sub">Guide budget reallocation decisions</p></div></div>
+      <table class="dt">
+        <thead><tr>
+          <th>Initiative</th><th>Business Unit</th><th>Actual Spend</th><th>Budget</th><th>Value Realized</th><th>Value Ratio</th><th>Confidence</th><th>Health</th>
+        </tr></thead>
+        <tbody>
+          ${DATA.initiatives.map(i => {
+            const ratio = (i.valueRealized/i.actualSpend).toFixed(2);
+            return `<tr class="init-row" data-id="${i.id}" style="cursor:pointer;">
+              <td><p class="td-name">${i.name}</p><p class="td-sub">${i.id}</p></td>
+              <td>${i.businessUnit}</td>
+              <td class="td-mono">${fmt$(i.actualSpend)}</td>
+              <td class="td-mono">${fmt$(i.budgetAmount)}</td>
+              <td class="td-mono">${fmt$(i.valueRealized)}</td>
+              <td class="td-mono"><span class="${ratioCls(parseFloat(ratio))}">${ratio}x</span></td>
+              <td class="td-mono">${fmtPct(i.deliveryConfidence)}</td>
+              <td>${pill(i.healthStatus)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.querySelectorAll(".init-row").forEach(row => {
+    row.addEventListener("click", () => openModal(row.dataset.id));
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   COPILOT
+══════════════════════════════════════════════════════════ */
+function renderCopilot() {
+  const scopeMap = {
+    executive:   ["summary.read","initiatives.read","finops.read","risks.read","chat.ask"],
+    pmo:         ["summary.read","initiatives.read","risks.read","chat.ask"],
+    engineering: ["initiatives.read","finops.read","risks.read","chat.ask"],
+    finance:     ["summary.read","finops.read","chat.ask"]
+  };
+  const currentScopes = scopeMap[state.role] || scopeMap.executive;
+  const allScopes = ["summary.read","initiatives.read","finops.read","risks.read","chat.ask"];
+
+  $("copilot-view").innerHTML = `
+    <div class="copilot-layout">
+      <div class="copilot-main">
+        <div class="chat-win">
+          <div class="chat-msgs" id="chat-msgs">
+            <div class="chat-msg assistant">
+              <p class="msg-role ai">AI Copilot</p>
+              <p class="msg-body">Ask about spend, value, risk, team capacity, or emerging issues across structured and unstructured sources. Answers are grounded in sample portfolio data with citations.</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <textarea id="chat-ta" class="chat-textarea" rows="3" placeholder="Ask a grounded question about spend, delivery, value, or risk…"></textarea>
+          <div class="chat-actions">
+            <button class="btn-primary" id="ask-btn" type="button">Ask copilot</button>
+            <button class="btn-secondary" id="reset-btn" type="button">Reset</button>
+          </div>
+          <div class="prompt-chips">
+            ${PROMPTS.map(p => `<button class="prompt-chip" data-prompt="${p}" type="button">${p}</button>`).join("")}
+          </div>
+        </div>
+      </div>
+
+      <div class="copilot-info">
+        <div class="info-card">
+          <p class="info-card-title">Response policy</p>
+          <div class="info-items">
+            <div class="info-item"><p class="info-item-title">Structured facts first</p><p class="info-item-body">Spend, budget, and initiative status from deterministic endpoints before inference.</p></div>
+            <div class="info-item"><p class="info-item-title">Citations included</p><p class="info-item-body">Each answer returns source records so you can trace the response.</p></div>
+            <div class="info-item"><p class="info-item-title">Role-aware access</p><p class="info-item-body">Finance-sensitive answers are blocked for roles without summary access.</p></div>
+          </div>
+        </div>
+        <div class="info-card">
+          <p class="info-card-title">Active role permissions</p>
+          <div class="role-info">
+            <p class="role-tag">${state.role.toUpperCase()}</p>
+            <div class="scope-chips">
+              ${allScopes.map(s => `<span class="scope-chip ${currentScopes.includes(s) ? "" : "blocked"}">${s}</span>`).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const msgsEl = $("chat-msgs");
+  const ta     = $("chat-ta");
+
+  function append(role, html) {
+    const d = document.createElement("div");
+    d.className = `chat-msg ${role}`;
+    d.innerHTML = html;
+    msgsEl.appendChild(d);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function buildAnswer(q) {
+    const ql = q.toLowerCase();
+    const finSens = ql.includes("budget") || ql.includes("spend") || ql.includes("forecast");
+    if (finSens && !currentScopes.includes("summary.read")) {
+      return { blocked: true, error: "This role cannot access finance-sensitive portfolio answers." };
+    }
+    let answer, confidence = 0.88, followUps = [], citations = [];
+    if (finSens) {
+      answer = "AI spend is $100.0M YTD. 42% is going to platform and infrastructure, while product use cases account for 31%. The largest overrun sits in Enterprise Model Gateway at $22.6M actual against a $19.0M budget.";
+      confidence = 0.91; citations = DATA.documents.filter(d => ["doc-3","doc-4"].includes(d.id));
+      followUps = ["Review platform token and vendor costs in Enterprise Model Gateway.", "Shift incremental funding toward initiatives with stronger cost-to-value — especially INIT-133 and INIT-104."];
+    } else if (ql.includes("behind") || ql.includes("over budget")) {
+      answer = "Enterprise Model Gateway is over budget at $22.6M against a $19.0M budget and showing hidden delivery drift. Knowledge Search for Sales is over forecast and low on realized value at $1.2M against $8.9M spend.";
+      confidence = 0.90; citations = DATA.documents.filter(d => ["doc-1","doc-5"].includes(d.id));
+      followUps = ["Escalate vendor latency and MLOps support issues for INIT-118.", "Require a recovery plan and adoption milestones for INIT-140."];
+    } else if (ql.includes("risk") || ql.includes("status") || ql.includes("drift")) {
+      answer = "The strongest hidden risk signal is Enterprise Model Gateway. Formal reporting is green but Slack and Confluence show repeated latency concerns, scope reduction, and rising token variance — drift score 82. Shared data engineering is also a cross-portfolio bottleneck.";
+      confidence = 0.92; citations = DATA.documents.filter(d => ["doc-1","doc-2"].includes(d.id));
+      followUps = ["Add status drift review to PMO governance cadence.", "Allocate additional shared data engineering and MLOps support."];
+    } else if (ql.includes("team") || ql.includes("help") || ql.includes("capacity")) {
+      answer = "ML Platform (129% load) and Shared Data Engineering (122% load) need help first. Both are operating above capacity and support multiple downstream initiatives, so pressure propagates across the portfolio.";
+      confidence = 0.89; citations = DATA.documents.filter(d => ["doc-3"].includes(d.id));
+      followUps = ["Reallocate platform engineering capacity to the most constrained shared teams.", "Reduce low-value pilot load until support debt improves."];
+    } else {
+      answer = "The portfolio is spending $100.0M YTD with $30.0M in realized value. Three initiatives show status drift, and shared platform capacity is the most consistent bottleneck across delivery programs.";
+      citations = DATA.documents.slice(0, 2);
+      followUps = ["Open the Executive or Portfolio Ops view for the most material risk drivers.", "Refine with a business unit, initiative name, or time period."];
+    }
+    return { blocked: false, answer, confidence, followUps, citations };
+  }
+
+  async function ask(question) {
+    if (!question.trim()) return;
+    append("user", `<p class="msg-role">You</p><p class="msg-body">${question}</p>`);
+    const ld = document.createElement("div");
+    ld.className = "chat-msg assistant";
+    ld.innerHTML = `<p class="msg-body"><span class="spinner"></span>Analyzing portfolio data…</p>`;
+    msgsEl.appendChild(ld); msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    await new Promise(r => setTimeout(r, 700 + Math.random()*400));
+    const result = buildAnswer(question);
+    ld.remove();
+
+    if (result.blocked) {
+      append("assistant", `<p class="msg-role ai">AI Copilot</p><div class="access-blocked">${result.error}</div>`);
+      return;
+    }
+    const cp = Math.round(result.confidence * 100);
+    append("assistant", `
+      <p class="msg-role ai">AI Copilot</p>
+      <p class="msg-body">${result.answer}</p>
+      <div class="conf-bar"><span class="conf-lbl">Confidence</span><div class="conf-track"><div class="conf-fill" style="width:${cp}%"></div></div><span class="conf-val">${cp}%</span></div>
+      ${result.citations.length ? `<div class="msg-citations">${result.citations.map(c => `<div class="citation-chip"><span class="cit-src">${c.source}</span><span class="cit-label">${c.title}</span><span class="cit-time">${fmtT(c.freshness)}</span></div>`).join("")}</div>` : ""}
+      ${result.followUps.length ? `<div class="msg-actions">${result.followUps.map(a => `<div class="action-item">${a}</div>`).join("")}</div>` : ""}
+    `);
+  }
+
+  $("ask-btn").addEventListener("click", () => { const q = ta.value.trim(); if (q) { ta.value=""; ask(q); } });
+  $("reset-btn").addEventListener("click", () => {
+    ta.value = "";
+    msgsEl.innerHTML = `<div class="chat-msg assistant"><p class="msg-role ai">AI Copilot</p><p class="msg-body">Session reset. Ask a new grounded question about the portfolio.</p></div>`;
+  });
+  ta.addEventListener("keydown", e => { if (e.key==="Enter" && !e.shiftKey) { e.preventDefault(); const q=ta.value.trim(); if(q){ta.value="";ask(q);} } });
+  document.querySelectorAll(".prompt-chip").forEach(b => b.addEventListener("click", () => ask(b.dataset.prompt)));
+}
+
+/* ══════════════════════════════════════════════════════════
+   SUPPORT VIEW
+══════════════════════════════════════════════════════════ */
+function renderSupport() {
+  const layers = [
+    {
+      title: "Source systems",
+      bullets: ["Jira delivery data", "Planview milestones", "RAID logs", "Meeting notes", "Program docs and operating records"]
+    },
+    {
+      title: "Ingestion + normalization",
+      bullets: ["Extract common fields", "Normalize owners and dates", "Standardize status and severity", "Tag dependencies and risk signals"]
+    },
+    {
+      title: "Team Brain",
+      bullets: ["Program charter", "Decision rules", "Glossary", "Operating cadence", "Approved program context"]
+    },
+    {
+      title: "AI agent layer",
+      bullets: ["Status drafting", "Meeting intelligence", "Risk sensing", "Executive narrative generation", "Context retrieval and guardrails"]
+    },
+    {
+      title: "Human review + publishing",
+      bullets: ["TPM validation", "Security and governance review", "Leadership-ready update", "Final publishing to reporting channels"]
+    }
+  ];
+
+  const agents = [
+    ["Status Rollup Agent", "Summarizes Jira, milestone, and RAID signals into a weekly reporting draft."],
+    ["Meeting Intelligence Agent", "Pulls decisions, actions, and narrative shifts from meeting notes or transcripts."],
+    ["Risk & Dependency Agent", "Flags aging risks, stale dependencies, and escalation candidates before status turns red."],
+    ["Executive Update Agent", "Generates concise, decision-oriented leadership updates from program signals and KPIs."],
+    ["Team Brain Agent", "Retrieves approved program context so outputs stay grounded in how the team actually operates."],
+    ["Governance Guardrail Agent", "Checks policy boundaries, sensitive content, and human approval requirements before publishing."]
+  ];
+
+  $("support-view").innerHTML = `
+    <div class="support-hero">
+      <p class="eyebrow">Support Model</p>
+      <p class="support-hero-title">How this final reporting view is used and supported</p>
+      <p class="support-hero-text">
+        Keep this site as the final leadership-facing reporting experience. Use this page to explain the operating model behind it:
+        data comes in from source systems, gets normalized, is enriched by the team brain, drafted by specialized AI agents,
+        and then goes through human review before publishing.
+      </p>
+    </div>
+
+    <div class="g3">
+      <div class="support-card">
+        <p class="support-card-title">Used for</p>
+        <p class="support-card-text">Executive reporting, PMO rollups, portfolio risk review, and decision framing.</p>
+      </div>
+      <div class="support-card">
+        <p class="support-card-title">Supported by</p>
+        <p class="support-card-text">Connected systems, workflow normalization, context retrieval, and agent orchestration.</p>
+      </div>
+      <div class="support-card">
+        <p class="support-card-title">Published through</p>
+        <p class="support-card-text">Human validation, governance checks, and leadership-ready communication channels.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd">
+        <div><p class="panel-title">Layers</p><p class="panel-sub">The stack that supports the final reporting experience</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="support-list">
+          ${layers.map((layer, i) => `
+            <div class="support-item">
+              <div class="support-item-head">
+                <span class="support-num">${i + 1}</span>
+                <span class="support-item-title">${layer.title}</span>
+              </div>
+              <div class="support-bullets">
+                ${layer.bullets.map((bullet) => `<span class="support-bullet">• ${bullet}</span>`).join("")}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+        <div class="support-flow">Source systems → Ingestion + normalization → Team Brain → AI agent layer → Human review + publishing</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd">
+        <div><p class="panel-title">Agents</p><p class="panel-sub">Who does what before final reporting is published</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="g2e">
+          ${agents.map(([name, desc]) => `
+            <div class="support-item">
+              <div class="support-item-head">
+                <span class="support-num">AI</span>
+                <span class="support-item-title">${name}</span>
+              </div>
+              <p class="support-card-text">${desc}</p>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════════════ */
+function openModal(id) {
+  const i = DATA.initiatives.find(x => x.id === id);
+  if (!i) return;
+
+  $("modal-id").textContent = i.id + " · " + i.team;
+  $("modal-title").textContent = i.name;
+  $("modal-tags").innerHTML = [
+    pill(i.healthStatus),
+    `<span class="modal-tag">${i.businessUnit}</span>`,
+    `<span class="modal-tag">Owner: ${i.owner}</span>`,
+    `<span class="modal-tag">Formal: ${i.status}</span>`
+  ].join("");
+
+  const atRisk = i.milestones.filter(m => m.status === "at_risk").length;
+  const ratio  = (i.valueRealized / i.actualSpend).toFixed(2);
+
+  $("modal-body").innerHTML = `
+    <div class="modal-stats">
+      <div class="modal-stat"><p class="modal-stat-lbl">Actual Spend</p><p class="modal-stat-val">${fmt$(i.actualSpend)}</p></div>
+      <div class="modal-stat"><p class="modal-stat-lbl">Budget</p><p class="modal-stat-val">${fmt$(i.budgetAmount)}</p></div>
+      <div class="modal-stat"><p class="modal-stat-lbl">Value Realized</p><p class="modal-stat-val">${fmt$(i.valueRealized)}</p></div>
+      <div class="modal-stat"><p class="modal-stat-lbl">Delivery Confidence</p><p class="modal-stat-val">${fmtPct(i.deliveryConfidence)}</p></div>
+    </div>
+
+    <div>
+      <p class="modal-section-title">Program notes</p>
+      <p class="modal-notes">${i.notes}</p>
+    </div>
+
+    <div>
+      <p class="modal-section-title">Milestones</p>
+      <div class="ms-list">
+        ${i.milestones.map(m => `
+          <div class="ms-row" style="padding:10px;background:var(--bg3);border-radius:var(--r-sm);border:1px solid var(--border);">
+            <span class="ms-dot ${m.status}"></span>
+            <span class="ms-name">${m.name}</span>
+            <span style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+              ${pill(m.status.replace("_"," "))}
+              <span class="ms-date">${m.targetDate}</span>
+            </span>
+          </div>`).join("")}
+      </div>
+    </div>
+
+    <div class="g2e">
+      <div>
+        <p class="modal-section-title">Value analysis</p>
+        <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+          <div><p class="m-label">Cost-to-value ratio</p><p style="font-family:var(--font-serif);font-size:1.8rem;" class="${ratioCls(parseFloat(ratio))}">${ratio}x</p></div>
+          <div><p class="m-label">Forecast spend</p><p class="td-mono" style="font-size:14px;">${fmt$(i.forecastAmount)}</p></div>
+          <div><p class="m-label">Budget variance</p><p class="td-mono" style="font-size:14px;color:${i.actualSpend>i.budgetAmount?'var(--red)':'var(--green)'};">${i.actualSpend>i.budgetAmount?"▲ Over by "+fmt$(i.actualSpend-i.budgetAmount):"▼ Under by "+fmt$(i.budgetAmount-i.actualSpend)}</p></div>
+        </div>
+      </div>
+      <div>
+        <p class="modal-section-title">Risk signals</p>
+        <div class="card" style="display:flex;flex-direction:column;gap:8px;">
+          <div><p class="m-label">At-risk milestones</p><p style="font-family:var(--font-serif);font-size:1.8rem;color:${atRisk>0?'var(--red)':'var(--green)'};">${atRisk}</p></div>
+          <div><p class="m-label">Last updated</p><p style="font-size:13px;color:var(--soft);">${new Date(i.lastUpdated).toLocaleDateString()}</p></div>
+          ${DATA.risks.find(r=>r.initiativeId===i.id) ? `<div>${pill("drift detected")}</div>` : `<div>${pill("no drift signal")}</div>`}
+        </div>
+      </div>
+    </div>
+  `;
+
+  $("modal-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+  $("modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+$("modal-close").addEventListener("click", closeModal);
+$("modal-overlay").addEventListener("click", e => { if (e.target === $("modal-overlay")) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+/* ══════════════════════════════════════════════════════════
+   DEMO TOUR
+══════════════════════════════════════════════════════════ */
+let tourStep = 0;
+
+function startTour() {
+  tourStep = 0;
+  showTourStep();
+  $("tour-overlay").classList.add("open");
+}
+
+function showTourStep() {
+  const steps = TOUR_STEPS;
+  const step  = steps[tourStep];
+
+  $("tour-step").textContent  = `Step ${tourStep+1} of ${steps.length}`;
+  $("tour-title").textContent = step.title;
+  $("tour-text").textContent  = step.text;
+  $("tour-next").textContent  = tourStep < steps.length-1 ? "Next →" : "Finish";
+
+  // dots
+  $("tour-dots").innerHTML = steps.map((_,i) =>
+    `<div class="tour-dot ${i===tourStep?'active':''}"></div>`).join("");
+
+  // position tooltip
+  const tt = $("tour-tooltip");
+  tt.style.top  = "50%";
+  tt.style.left = "50%";
+  tt.style.transform = "translate(-50%, -50%)";
+}
+
+$("tour-btn").addEventListener("click", startTour);
+
+$("tour-next").addEventListener("click", () => {
+  tourStep++;
+  if (tourStep >= TOUR_STEPS.length) {
+    $("tour-overlay").classList.remove("open");
+  } else {
+    showTourStep();
+  }
+});
+
+$("tour-skip").addEventListener("click", () => {
+  $("tour-overlay").classList.remove("open");
+});
+
+$("tour-backdrop").addEventListener("click", () => {
+  $("tour-overlay").classList.remove("open");
+});
+
+/* ══════════════════════════════════════════════════════════
+   VIEW SWITCHING
+══════════════════════════════════════════════════════════ */
+function setView(name) {
+  const allowed = ROLE_ACCESS[state.role] || ROLE_ACCESS.executive;
+  if (!allowed.includes(name)) name = allowed[0];
+  state.currentView = name;
+
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === `${name}-view`));
+
+  $("view-title").textContent = VIEWS[name].title;
+  $("view-sub").textContent   = VIEWS[name].sub;
+}
+
+function updateNavVisibility() {
+  const allowed = ROLE_ACCESS[state.role] || ROLE_ACCESS.executive;
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    b.style.display = allowed.includes(b.dataset.view) ? "" : "none";
+  });
+  if (!allowed.includes(state.currentView)) setView(allowed[0]);
+}
+
+/* ══════════════════════════════════════════════════════════
+   BOOTSTRAP
+══════════════════════════════════════════════════════════ */
+function init() {
+  renderFreshness();
+  renderOverview();
+  renderOperations();
+  renderFinops();
+  renderCopilot();
+  renderSupport();
+  updateNavVisibility();
+  setView("overview");
+
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      setView(btn.dataset.view);
+      if (btn.dataset.view === "copilot") renderCopilot();
+      $("sidebar").classList.remove("open");
+    });
+  });
+
+  $("role-sel").addEventListener("change", e => {
+    state.role = e.target.value;
+    updateNavVisibility();
+    renderCopilot();
+  });
+
+  $("mobile-menu").addEventListener("click", () => $("sidebar").classList.toggle("open"));
+
+  document.addEventListener("click", e => {
+    const sb = $("sidebar");
+    if (sb.classList.contains("open") && !sb.contains(e.target) && !$("mobile-menu").contains(e.target)) {
+      sb.classList.remove("open");
+    }
+  });
+}
+
+document.readyState === "loading"
+  ? document.addEventListener("DOMContentLoaded", init)
+  : init();
+</script>
+</body>
 </html>
