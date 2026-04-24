@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
   Sparkles, AlertTriangle, CheckCircle2, Clock,
-  FileText, GitBranch, ShieldCheck
+  FileText, GitBranch, ShieldCheck, LayoutDashboard, Layers3, Bot
 } from "lucide-react";
 
 const jiraStories = [
@@ -24,7 +24,7 @@ const meetingNotes = `Weekly AI PM Operating Rhythm - Q2 Sprint 3
 Data Engineering confirmed Jira data extraction is working in lower environment, but production access is pending. Platform team is blocked because Planview milestone exports changed column names. Security asked for a PHI redaction proof before broader rollout. TPM Ops completed the standardized intake template. Leadership wants a concise executive update by Friday.`;
 
 function App() {
-  const [tab, setTab] = useState("layers");
+  const [page, setPage] = useState("reporting");
 
   const done = jiraStories.filter((x) => x.status === "Done").length;
   const inProgress = jiraStories.filter((x) => x.status === "In Progress").length;
@@ -47,11 +47,45 @@ function App() {
         <div className="badge"><Sparkles size={16} /> AI-native TPM prototype</div>
         <h1>AI-Powered Program Operating System</h1>
         <p>
-          A real-life BSC-style TPM system that turns Jira, RAID logs, meeting notes,
-          and team context into status rollups, risk digests, executive updates, and AI-readable documentation.
+          Final reporting lives in one place, while a separate support page shows how
+          source systems, normalization, team context, agents, and human review make that reporting work.
         </p>
       </header>
 
+      <nav className="page-switch">
+        <button
+          type="button"
+          onClick={() => setPage("reporting")}
+          className={page === "reporting" ? "active" : ""}
+        >
+          <LayoutDashboard size={16} /> Final Reporting
+        </button>
+        <button
+          type="button"
+          onClick={() => setPage("support")}
+          className={page === "support" ? "active" : ""}
+        >
+          <Layers3 size={16} /> How It Works
+        </button>
+      </nav>
+
+      {page === "reporting" && (
+        <ReportingPage
+          done={done}
+          inProgress={inProgress}
+          blocked={blocked}
+          riskDigest={riskDigest}
+        />
+      )}
+
+      {page === "support" && <SupportPage />}
+    </div>
+  );
+}
+
+function ReportingPage({ done, inProgress, blocked, riskDigest }) {
+  return (
+    <>
       <section className="metrics">
         <Metric icon={<CheckCircle2 />} label="Done" value={done} />
         <Metric icon={<Clock />} label="In Progress" value={inProgress} />
@@ -59,22 +93,49 @@ function App() {
         <Metric icon={<GitBranch />} label="Open RAID" value={raidItems.length} />
       </section>
 
-      <nav className="tabs">
-        {["layers", "agents", "status", "risks", "exec", "brain", "data"].map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={tab === t ? "active" : ""}>
-            {t.toUpperCase()}
-          </button>
-        ))}
-      </nav>
+      <div className="reporting-grid">
+        <Status done={done} inProgress={inProgress} blocked={blocked} />
+        <Exec />
+      </div>
 
-      {tab === "layers" && <Layers />}
-      {tab === "agents" && <Agents />}
-      {tab === "status" && <Status done={done} inProgress={inProgress} blocked={blocked} />}
-      {tab === "risks" && <Risks riskDigest={riskDigest} />}
-      {tab === "exec" && <Exec />}
-      {tab === "brain" && <Brain />}
-      {tab === "data" && <Data />}
-    </div>
+      <Risks riskDigest={riskDigest} />
+      <Data />
+    </>
+  );
+}
+
+function SupportPage() {
+  return (
+    <>
+      <Card title="How The Reporting Is Used And Supported" icon={<Bot />}>
+        <div className="support-intro">
+          <p>
+            The final reporting page is the leadership-facing output. This support page shows
+            the operating model behind it: where the data comes from, how it gets normalized,
+            how the team brain adds program context, which agents generate drafts, and where
+            human review happens before publishing.
+          </p>
+          <div className="grid3">
+            <SupportPoint
+              title="Used By"
+              text="TPMs, PMO leads, engineering managers, and executives who need one weekly source of truth."
+            />
+            <SupportPoint
+              title="Supported By"
+              text="Connected source systems, ingestion workflows, program context, agent orchestration, and governance checks."
+            />
+            <SupportPoint
+              title="Published Through"
+              text="Human review, security guardrails, and final reporting channels such as executive updates or Slack digests."
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Layers />
+      <Agents />
+      <Brain />
+    </>
   );
 }
 
@@ -213,6 +274,10 @@ function Card({ title, icon, children }) {
 
 function BrainItem({ title, text, code }) {
   return <div className="brain"><h3>{title}</h3><p>{text}</p><pre>{code}</pre></div>;
+}
+
+function SupportPoint({ title, text }) {
+  return <div className="brain"><h3>{title}</h3><p>{text}</p></div>;
 }
 
 export default App;
